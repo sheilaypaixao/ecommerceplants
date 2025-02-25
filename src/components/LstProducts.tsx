@@ -4,18 +4,32 @@ import Modal from '../components/Modal'
 import Utils from '../components/Utils';
 import { useRef, useState } from 'react';
 
-export default function LstProducts({lstProducts, limit}){
+
+interface Product {
+    img: string,
+    name: string,
+    price: number,
+    id: number
+}
+
+interface LstProductsProps {
+    lstProducts: Product[],
+    limit?: number
+}
+
+var addEventScroll:any = null;
+
+const LstProducts: React.FC<LstProductsProps>  = ({lstProducts, limit} )=> {
     //var lstProducts = useState(lst);
-    var refModalAddSucesso = useRef(0);
-    var addEventScroll = useRef(null);
+    var refModalAddSucesso = useRef<any>(null);
     var [limitPag, setLimitPag] = useState(limit || 6);
 
-    console.log(limit, !limit);
+    //console.log(limit, !limit);
 
     if(!limit){
-        document.removeEventListener("scroll", addEventScroll.current);
+        document.removeEventListener("scroll", addEventScroll);
 
-        addEventScroll.current = (event) => {        
+        addEventScroll = () => {        
             const scroll = window.scrollY + window.innerHeight;
             const documentHeight = document.documentElement.offsetHeight;
 
@@ -30,21 +44,21 @@ export default function LstProducts({lstProducts, limit}){
 
         }
     
-        document.addEventListener("scroll", addEventScroll.current);
+        document.addEventListener("scroll", addEventScroll);
     }
 
-    function addProduct(id:number,e){
+    function addProduct(id:number,e: React.MouseEvent){
         e.preventDefault();
         
         ShoppingCart.addProduct(id);
 
-        refModalAddSucesso.current.open();
+        refModalAddSucesso.current!.open();
     }
 
     function renderLstProducts(){
         var html:any = [];
 
-        lstProducts.slice(0,limitPag).map((product:{img:string, name: string, price:number, id:number}, index:number) => {    
+        lstProducts.slice(0,limitPag).map((product:Product, index:number) => {
                 
             html.push(<li key={index} className="grid grid-cols-2 bg-white gap-3 shadow-xl">
                 <figure>
@@ -53,7 +67,7 @@ export default function LstProducts({lstProducts, limit}){
                 <div className="text-xs">
                 <h4>{product.name}</h4>
                 <p>R$ {Utils.formatReal(product.price)}</p>
-                <a href="#" onClick={(e)=> addProduct(product.id, e)} className="text-yellow-400 mt-[15px] block">Comprar</a>
+                <a href="#" onClick={(e: React.MouseEvent)=> addProduct(product.id, e)} className="text-yellow-400 mt-[15px] block">Comprar</a>
                 </div>
             </li>)  
         })
@@ -75,7 +89,5 @@ export default function LstProducts({lstProducts, limit}){
     );
 }
 
-LstProducts.defaultProps = {
-    lstProducts: [],
-    limit: null
-  }
+export default LstProducts;
+

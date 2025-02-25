@@ -1,14 +1,22 @@
 import { useState, useEffect, useImperativeHandle } from 'react';
 
 
-export default function Modal({ref, children, callbackClose=null}) {
+type ModalProps = {
+    ref: any;
+    children: React.ReactNode;
+    callbackClose?: () => void;
+};
+
+
+
+const Modal: React.FC<ModalProps> = ({ref, children, callbackClose}) => {
 	var [visible, setVisible] = useState(false);
 
 	useEffect(()=>{
-		let body: HTMLHtmlElement | null = document.querySelector("html");
+		let body: HTMLHtmlElement | null  = document.querySelector("html");
         let modal = document.querySelector(".modal-default");
 		let h = body?.getBoundingClientRect().height;
-        let top = body.scrollTop + 100;
+        let top = body && (body.scrollTop + 100);
 		let bg = document.querySelector(".modal-bg");
 
 		//body.scrollTop = 0;
@@ -25,7 +33,7 @@ export default function Modal({ref, children, callbackClose=null}) {
 		setVisible(true);
 	}
 
-	function close(e: Event) {
+	function close(e: React.MouseEvent) {
 		e.preventDefault();
 
 	    setVisible(false);
@@ -34,10 +42,14 @@ export default function Modal({ref, children, callbackClose=null}) {
 	    if(callbackClose) callbackClose();
 	}
 
-	useImperativeHandle(ref, (e: Event) => {
+	useImperativeHandle(ref, () => {
 		return{
-	    	open: open,
-	    	close: close.bind(e)
+	    	open():void{
+                open();
+            },
+            close(e: React.MouseEvent):void {
+                close(e);
+            }
 	};
 	}, [visible]);
 
@@ -47,10 +59,13 @@ export default function Modal({ref, children, callbackClose=null}) {
 
 	          {children}
 
-	          <a className="modal-close" href="#" onClick={(e)=> close(e)}> X </a>
+	          <a className="modal-close" href="#" onClick={(e: React.MouseEvent)=> close(e)}> X </a>
 	        </div>}
 
 	        {visible && <div className="modal-bg"></div>}
         </>
 	);
 }
+
+
+export default Modal;
